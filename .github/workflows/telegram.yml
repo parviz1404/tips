@@ -1,7 +1,7 @@
 name: civil-auto-tips
 on:
   schedule:
-    - cron: "*/30 * * * *"   # هر ۳۰ دقیقه
+    - cron: "*/60 * * * *"   # هر 60 دقیقه
   workflow_dispatch:
 
 permissions:
