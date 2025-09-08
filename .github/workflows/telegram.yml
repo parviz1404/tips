@@ -2,26 +2,41 @@ name: civil-auto-tips
 
 on:
   schedule:
-    - cron: "*/30 * * * *"   # هر ۳۰ دقیقه
+    - cron: "*/30 * * * *"
   workflow_dispatch:
   push:
     branches: [ main ]
     paths-ignore:
-      - 'history.json'       # تا کامیت history دوباره اجرا را لوپ نکند
+      - 'history.json'
 
 permissions:
-  contents: write            # برای commit کردن history.json
+  contents: write
 
 jobs:
   send:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      # 🔍 Preflight: چکِ داشتن سکرت‌ها و فرمت CHAT_ID
+      - name: Preflight env check
+        env:
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          CHAT_ID: ${{ secrets.CHAT_ID }}
+        run: |
+          if [ -z "$BOT_TOKEN" ]; then echo "ERR: BOT_TOKEN secret missing"; exit 1; fi
+          if [ -z "$CHAT_ID" ]; then echo "ERR: CHAT_ID secret missing"; exit 1; fi
+          case "$CHAT_ID" in
+            -100*) echo "CHAT_ID format looks like supergroup ✔";;
+            *) echo "WARN: CHAT_ID does not start with -100 (is it a supergroup?)";;
+          esac
+
       - name: Send auto-generated tip
         env:
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
         run: python3 main.py
+
       - name: Commit & push history if changed
         run: |
           if [ -n "$(git status --porcelain)" ]; then
