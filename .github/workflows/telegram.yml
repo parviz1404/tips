@@ -1,11 +1,16 @@
 name: civil-auto-tips
+
 on:
   schedule:
-    - cron: "*/60 * * * *"   # هر 60 دقیقه
+    - cron: "*/30 * * * *"   # هر ۳۰ دقیقه
   workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths-ignore:
+      - 'history.json'       # تا کامیت history دوباره اجرا را لوپ نکند
 
 permissions:
-  contents: write   # برای commit کردن history.json
+  contents: write            # برای commit کردن history.json
 
 jobs:
   send:
