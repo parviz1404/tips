@@ -1,0 +1,30 @@
+name: civil-auto-tips
+on:
+  schedule:
+    - cron: "*/30 * * * *"   # هر ۳۰ دقیقه
+  workflow_dispatch:
+
+permissions:
+  contents: write   # برای commit کردن history.json
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Send auto-generated tip
+        env:
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          CHAT_ID: ${{ secrets.CHAT_ID }}
+        run: python3 main.py
+      - name: Commit & push history if changed
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add history.json
+            git commit -m "chore: log tip $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+            git push
+          else
+            echo "No changes to commit."
+          fi
